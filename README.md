@@ -432,7 +432,7 @@ Replace the terraform `tailscale_authkey` variable with your real key in `file:/
 terraform init
 terraform plan
 terraform apply
-tailscale_authkey = "tskey-auth-xxxxxxxx"
+$tailscale_authkey = "tskey-auth-xxxxxxxx"
 terraform apply
 ```
 
