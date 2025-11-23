@@ -420,16 +420,19 @@ Replace the terraform `tailscale_authkey` variable with your real key in `file:/
 
 `tailscale_authkey = "tskey-auth-ABC123..."`
 
->**Or export the key** as a temporary variable before running terraform (RECOMMENDED)
+>**Or assign the key** from the CLI as a temporary variable before running terraform (RECOMMENDED)
 
-`export tailscale_authkey="tskey-auth-ABC123..."`
+`tailscale_authkey="tskey-auth-ABC123..."`
 
 ---
 
 ### Run Terraform
 
 ```
-export tailscale_authkey="..."
+terraform init
+terraform plan
+terraform apply
+tailscale_authkey = "tskey-auth-xxxxxxxx"
 terraform apply
 ```
 
