@@ -1,0 +1,3 @@
+ami-014f91f72b49fb01b
+
+  ami                    = "data.aws_ami.kali.id"     <-- Was this replaced; if so, delete this extra text.

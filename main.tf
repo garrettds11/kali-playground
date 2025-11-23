@@ -1,41 +1,7 @@
 ########################################
 # Data source: Kali Linux AMI
 ########################################
-# NOTE:
-#   - This filter is an example that often works for Marketplace-based AMIs.
-#   - You may need to adjust `owners` and/or `filter` values after you pick
-#     the exact Marketplace product you want.
-########################################
 
-data "aws_ami" "kali" {
-  most_recent = true
-
-  # For Marketplace AMIs, owners is usually "aws-marketplace".
-  owners = ["aws-marketplace"]
-
-  # You will likely need to tweak the name filter after selecting your product.
-  # In the console, once you choose a Kali AMI, check its "AMI ID" and "Name".
-  # Then adapt `name` or another filter to match it.
-  filter {
-    name   = "name"
-    values = ["kali-linux-*"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
 
 ########################################
 # Security Group: kali-sg
@@ -44,7 +10,7 @@ data "aws_ami" "kali" {
 resource "aws_security_group" "kali_sg" {
   name        = "kali-sg"
   description = "Security group for Kali EC2 lab instance"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.kali_vpc.id
 
   # SSH inbound
   ingress {
@@ -78,20 +44,58 @@ resource "aws_security_group" "kali_sg" {
 }
 
 ########################################
-# Default VPC + Subnet (simple case)
+# Network: VPC, Subnet, IGW, Route Table
 ########################################
 
-data "aws_vpc" "default" {
-  default = true
+# New isolated VPC for the Kali lab
+resource "aws_vpc" "kali_vpc" {
+  cidr_block           = "10.42.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = "kali-lab-vpc"
+  }
 }
 
-data "aws_subnet_ids" "default" {
-  vpc_id = data.aws_vpc.default.id
+# Public subnet so the instance can reach the internet (for Tailscale)
+resource "aws_subnet" "kali_subnet" {
+  vpc_id                  = aws_vpc.kali_vpc.id
+  cidr_block              = "10.42.1.0/24"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "kali-lab-subnet"
+  }
 }
 
-# Just pick the first default subnet for simplicity
-locals {
-  kali_subnet_id = element(data.aws_subnet_ids.default.ids, 0)
+# Internet gateway for outbound access
+resource "aws_internet_gateway" "kali_igw" {
+  vpc_id = aws_vpc.kali_vpc.id
+
+  tags = {
+    Name = "kali-lab-igw"
+  }
+}
+
+# Route table for the public subnet
+resource "aws_route_table" "kali_rt" {
+  vpc_id = aws_vpc.kali_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.kali_igw.id
+  }
+
+  tags = {
+    Name = "kali-lab-rt"
+  }
+}
+
+# Associate the route table with the subnet
+resource "aws_route_table_association" "kali_rta" {
+  subnet_id      = aws_subnet.kali_subnet.id
+  route_table_id = aws_route_table.kali_rt.id
 }
 
 ########################################
@@ -99,9 +103,9 @@ locals {
 ########################################
 
 resource "aws_instance" "kali_lab" {
-  ami                    = data.aws_ami.kali.id     <-- Was this replaced; if so, delete this extra text.
+  ami                    = "ami-014f91f72b49fb01b"
   instance_type          = var.instance_type
-  subnet_id              = local.kali_subnet_id
+  subnet_id              = aws_subnet.kali_subnet.id
   vpc_security_group_ids = [aws_security_group.kali_sg.id]
   associate_public_ip_address = true
   key_name               = var.key_name
@@ -127,7 +131,7 @@ resource "aws_instance" "kali_lab" {
     apt-get install -y tailscale
 
     # Bring Tailscale online using a preauthorized key
-    tailscale up --authkey=${tailscale_authkey} \
+    tailscale up --authkey=${var.tailscale_authkey} \
                  --ssh \
                  --hostname=kali-lab-$(hostname)
 
@@ -163,6 +167,6 @@ output "kali_public_dns" {
 }
 
 output "kali_ami_id" {
-  description = "AMI ID used for the Kali instance"
-  value       = data.aws_ami.kali.id
+  description = "Hard-coded AMI used for Kali"
+  value       = "ami-014f91f72b49fb01b"
 }
