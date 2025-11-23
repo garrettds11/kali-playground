@@ -103,7 +103,7 @@ resource "aws_route_table_association" "kali_rta" {
 ########################################
 
 resource "aws_instance" "kali_lab" {
-  ami                         = "ami-014f91f72b49fb01b"
+  ami                         = "data.aws_ami.kali.id"     <-- Was this replaced; if so, delete this extra text.
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.kali_subnet.id
   vpc_security_group_ids      = [aws_security_group.kali_sg.id]

@@ -11,3 +11,11 @@
 
 # no virtual environments
 venv/*
+
+# no Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# no applications
+vulnapp-*
