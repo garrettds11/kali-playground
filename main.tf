@@ -103,41 +103,49 @@ resource "aws_route_table_association" "kali_rta" {
 ########################################
 
 resource "aws_instance" "kali_lab" {
-  ami                    = "ami-014f91f72b49fb01b"
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.kali_subnet.id
-  vpc_security_group_ids = [aws_security_group.kali_sg.id]
+  ami                         = "ami-014f91f72b49fb01b"
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.kali_subnet.id
+  vpc_security_group_ids      = [aws_security_group.kali_sg.id]
   associate_public_ip_address = true
-  key_name               = var.key_name
+  key_name                    = var.key_name
 
   user_data = <<-EOF
     #!/bin/bash
     set -eux
 
-    # Ensure system is updated enough to install new packages
+    # Make sure we don't get stuck on interactive prompts
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Basic updates & tools
     apt-get update -y
+    apt-get install -y curl ca-certificates gnupg apt-transport-https
 
-    # Install curl + dependencies
-    apt-get install -y curl ca-certificates gnupg
-
-    # Add Tailscale repo + key (Debian/Kali)
+    # Add Tailscale's Debian (bookworm) repo + key
     curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg \
       | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
 
     curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list \
-      | tee /etc/apt/sources.list.d/tailscale.list
+      | tee /etc/apt/sources.list.d/tailscale.list >/dev/null
 
     apt-get update -y
     apt-get install -y tailscale
 
-    # Bring Tailscale online using a preauthorized key
-    tailscale up --authkey=${var.tailscale_authkey} \
-                 --ssh \
-                 --hostname=kali-lab-$(hostname)
-
-    # Persist Tailscale state
+    # Enable and start the daemon
     systemctl enable tailscaled
     systemctl start tailscaled
+
+    # Give it a second to settle
+    sleep 5
+
+    # Bring the node into your tailnet.
+    # NOTE: use a reusable/preauthorized auth key from the Tailscale admin UI.
+    tailscale up \
+      --auth-key=${var.tailscale_authkey} \
+      --ssh \
+      --hostname=kali-lab-$(hostname) \
+      2>&1 | tee /var/log/tailscale-up.log
+
   EOF
 
   root_block_device {
