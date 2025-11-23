@@ -1,0 +1,5 @@
+1. Get your tailscale key from your profile settings
+
+2. Replace the terraform `tailscale_authkey` variable with your real key in file://terraform.tfvars
+
+tailscale_authkey = "tskey-auth-ABC123..."
