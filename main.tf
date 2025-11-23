@@ -144,6 +144,7 @@ resource "aws_instance" "kali_lab" {
       --auth-key=${var.tailscale_authkey} \
       --ssh \
       --hostname=kali-lab-$(hostname) \
+      --advertise-tags=tag:kali \
       2>&1 | tee /var/log/tailscale-up.log
 
   EOF

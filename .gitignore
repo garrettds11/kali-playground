@@ -8,3 +8,6 @@
 *.terraform/
 *.terraform.lock.hcl
 *plan*
+
+# no virtual environments
+venv/*

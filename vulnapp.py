@@ -238,7 +238,7 @@ def render(tpl, **context):
 # -------------------------------------------------
 @app.route("/")
 def index():
-    return render_template_string(INDEX_TEMPLATE, base=BASE_TEMPLATE)
+    return render_template("index.html")
 
 
 @app.route("/search")
