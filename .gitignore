@@ -1,9 +1,10 @@
 # no secrets
 *secret*
+*.pem
 
 # no terraform state files
-.tfstate
-.tfstate.backup
-.terraform/
-.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.terraform/
+*.terraform.lock.hcl
 *plan*
