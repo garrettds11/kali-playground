@@ -10,6 +10,7 @@
 > 4. AWS CLI is installed.
 > 5. An AWS CLI profile is configured for authentication.
 > 6. You can host a vulnerable server from your own device.
+> 7. You can install and run python or node.js.
 >
 > [ https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html ]
 > 
