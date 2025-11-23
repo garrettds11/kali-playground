@@ -1,5 +1,5 @@
 # Penetration test from AWS
-## `w/ Kali + Tailscale + Flask`
+## `w/ Kali + Tailscale + Flask + Node`
 
 ===============================================================
 
@@ -10,6 +10,7 @@
 > 4. AWS CLI is installed.
 > 5. An AWS CLI profile is configured for authentication.
 > 6. You can host a vulnerable server from your own device.
+> 7. You can install and run python or node.js.
 >
 > [ https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html ]
 > 
@@ -419,16 +420,19 @@ Replace the terraform `tailscale_authkey` variable with your real key in `file:/
 
 `tailscale_authkey = "tskey-auth-ABC123..."`
 
->**Or export the key** as a temporary variable before running terraform (RECOMMENDED)
+>**Or assign the key** from the CLI as a temporary variable before running terraform (RECOMMENDED)
 
-`export tailscale_authkey="tskey-auth-ABC123..."`
+`tailscale_authkey="tskey-auth-ABC123..."`
 
 ---
 
 ### Run Terraform
 
 ```
-export tailscale_authkey="..."
+terraform init
+terraform plan
+terraform apply
+$tailscale_authkey = "tskey-auth-xxxxxxxx"
 terraform apply
 ```
 
