@@ -1,5 +1,5 @@
 # Penetration test from AWS
-## `w/ Kali + Tailscale + Flask + Node`
+## `w/ Kali + Tailscale + Vulnerable Target`
 
 ===============================================================
 
@@ -9,8 +9,8 @@
 > 3. You can SSH to a remote host if needed.
 > 4. AWS CLI is installed.
 > 5. An AWS CLI profile is configured for authentication.
-> 6. You can host a vulnerable server from your own device.
-> 7. You can install and run python or node.js.
+> 6. You can host a vulnerable server from your own device or a cloud.
+> 7. You can install and run python or node.js where needed.
 >
 > [ https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html ]
 > 
@@ -24,7 +24,8 @@
 > #### TABLE OF CONTENTS:
 > 1. Tailscale Setup
 > 2. Kali installation on EC2 via Terraform
-> 3. Connect Kali <:> Laptop
+> 3. Connect Kali <-> Laptop
+> 4. Target a vulnerable host
 
 ===============================================================
 
@@ -438,7 +439,7 @@ terraform apply
 
 ===============================================================
 
-## 3. Connect `Kali <:> Laptop`
+## 3. Connect `Kali <-> Laptop`
 
 **Access your Kali box**
 
@@ -450,7 +451,30 @@ terraform apply
 
 ---
 
-#### Run a vulnerable Flask app
+===============================================================
+
+## 4. Target a vulnerable host
+
+> You can hack an app on your own machine,
+> 
+> or you can chose another target you are authorized to test.
+
+---
+
+---
+
+#### Option 1: Run a vulnerable app REMOTELY
+
+1. You could provision your own vulnerable server in your own cloud.
+2. You could pay for a lab-as-a-service from https://www.vulnserverlabs.com
+
+---
+
+---
+
+#### Option 2: Run a vulnerable app LOCALLY
+
+##### Machine 1: A vulnerable Flask app
 
 * Create a virtual environment
 ```
@@ -472,7 +496,9 @@ venv\Scripts\activate
 
 * Visit it locally: `http://localhost:5000`
 
-#### Launch attacks from Kali
+---
+
+###### Launch attacks from Kali
 
 * Connect remotely:
 ```
@@ -495,9 +521,15 @@ http://<tailscale-ip>:5000/search?q=' OR 1=1--
 http://<tailscale-ip>:5000/comments
 ```
 
+> You can also target the Kali box from your laptop using its tailnet IP (100.x.y.z) if you later run a web UI (e.g. on port 8080) without exposing 8888 to the Internet at all. Just let Tailscale carry that traffic.
+
 ---
 
-#### Run a vulnerable Node app
+---
+
+..............................................................................................
+
+##### Machine 2: A vulnerable Node app
 
 * Install & run from the folder with package.json and app.js:
 ```
@@ -517,7 +549,9 @@ npm start
 
 * Visit it locally: `http://localhost:5000`
 
-#### Launch attacks from Kali
+---
+
+###### Launch attacks from Kali
 
 * Connect remotely:
 ```
@@ -560,9 +594,15 @@ http://<laptop-tailscale-ip>:5000/upload
 You can host malware files (safe for lab use). You can create a browser-based XSS or phishing page. You can upload web shells (in PHP servers — Node won’t execute PHP, but still demonstrates danger). You can use it as a “pivot” to attack users who visit the URL.")</script>
 ```
 
+> You can also target the Kali box from your laptop using its tailnet IP (100.x.y.z) if you later run a web UI (e.g. on port 8080) without exposing 8888 to the Internet at all. Just let Tailscale carry that traffic.
+
+---
+
+---
+
 ===============================================================
 
-> You can also target the Kali box from your laptop using its tailnet IP (100.x.y.z) if you later run a web UI (e.g. on port 8080) without exposing 8888 to the Internet at all. Just let Tailscale carry that traffic.
+
 
 # END
 
